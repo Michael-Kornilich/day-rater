@@ -1,11 +1,16 @@
+# db related
 import csv
 from datetime import datetime, date
+
+# API related
 import requests
-import argparse
-import subprocess
-import warnings
 import json
 from time import sleep
+
+# process related
+import subprocess
+import warnings
+import argparse
 
 
 def write_db_entry(entry: dict, path: str, na_convention: str = "None") -> None:
@@ -101,7 +106,7 @@ def load_json(path: str) -> dict:
     return dict_
 
 
-def request_json(url: str, metaname: str, tp: str = "GET", attempts: int = 3, wait: float | int = 5) -> dict:
+def request_json(url: str, metaname: str, tp: str = "GET", attempts: int = 3, wait: float | int = 5, **kwargs) -> dict:
     """
     Sends an url request with expectation of a json return value.
     :param url: the (fully loaded) url to send request to
@@ -109,6 +114,7 @@ def request_json(url: str, metaname: str, tp: str = "GET", attempts: int = 3, wa
     :param tp: type of the request to send: GET, POST, UPDATE...
     :param attempts: Number of attempts to make before giving up. Must be >= 1
     :param wait: Number of seconds to wait before making the next request. Must be >= 1
+    :param kwargs: keyword arguments to pass to requests
     :return: json as python dictionary
     """
     if not isinstance(url, str): raise TypeError(f"URL, must be a string, {type(url)} passed.")
@@ -121,7 +127,7 @@ def request_json(url: str, metaname: str, tp: str = "GET", attempts: int = 3, wa
     if wait < 1: raise ValueError("The wait time must be >= 1 (seconds).")
 
     for i in range(attempts):
-        response = getattr(requests, tp.lower())(url)
+        response = getattr(requests, tp.lower())(url, **kwargs)
         if response.ok: break
 
         warning = "Error calling the {what} API ({code}){again}.".format(
@@ -147,7 +153,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--day-rank", "-d",
     type=int,
-    default=-1,
+    default=0,
     choices=list(range(1, 11)),
     dest="day_rank",
     metavar="ranking"
@@ -162,40 +168,42 @@ args = vars(parser.parse_args())
 day_rank = args["day_rank"]
 analyze = args["analyze"]
 
-if day_rank != -1:
-    secrets = load_json("secrets.json")
+secrets = load_json("secrets.json")
+loaded_url = (
+    "https://api.tomorrow.io/v4/weather/history/recent?timesteps={timestep}&location={location}&units=metric&apikey={apikey}"
+    .format(timestep="1d", location=",".join(map(str, secrets["location"])), apikey=secrets["apikey"])
+)
 
-    loaded_url = (
-        "https://api.tomorrow.io/v4/weather/realtime?location={location}&units=metric&apikey={apikey}"
-        .format(location=",".join(map(str, secrets["location"])), apikey=secrets["apikey"])
-    )
-
+if day_rank:
     res = request_json(
         url=loaded_url,
         tp="GET",
         metaname="weather"
     )
+
     if res.items():
-        weather_data = res["data"]["values"]
+        weather_data = res["timelines"]["daily"][1]["values"]
     else:
         weather_data = dict()
 
     datetime_now: datetime = datetime.now()
     entry = {
-        # magnetic_activity, dusk, dawn
+        # magnetic_activity
         "datetime": datetime_now.strftime("%Y-%m-%d %H:%M:%S"),
         "day_rank": day_rank,
+        "sunrise": weather_data["sunriseTime"].replace("T", " ").replace("Z", ""),
+        "sunset": weather_data["sunsetTime"].replace("T", " ").replace("Z", ""),
         "season": get_season(datetime_now),
-        "temperature": weather_data.get("temperature"),
-        "cloud_cover": weather_data.get("cloudCover"),
-        "humidity": weather_data.get("humidity"),
-        "atm_pressure": weather_data.get("pressureSurfaceLevel"),
-        "wind_speed": weather_data.get("windSpeed"),
-        "wind_direction": weather_data.get("windDirection"),
-        "feels_like": weather_data.get("temperatureApparent"),
-        "rain_intensity": weather_data.get("rainIntensity"),
-        "sleet_intensity": weather_data.get("sleetIntensity"),
-        "snow_intensity": weather_data.get("snowIntensity")
+        "temperature": weather_data.get("temperatureAvg"),
+        "cloud_cover": weather_data.get("cloudCoverAvg"),
+        "humidity": weather_data.get("humidityAvg"),
+        "atm_pressure": weather_data.get("pressureSurfaceLevelAvg"),
+        "wind_speed": weather_data.get("windSpeedAvg"),
+        "wind_direction": weather_data.get("windDirectionAvg"),
+        "feels_like": weather_data.get("temperatureApparentAvg"),
+        "rain_intensity": weather_data.get("rainIntensityAvg"),
+        "sleet_intensity": weather_data.get("sleetIntensityAvg"),
+        "snow_intensity": weather_data.get("snowIntensityAvg")
     }
     write_db_entry(entry, "db.csv")
 
