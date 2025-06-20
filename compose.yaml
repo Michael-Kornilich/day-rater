@@ -1,0 +1,24 @@
+# If you need more help, visit the Docker Compose reference guide at
+# https://docs.docker.com/go/compose-spec-reference/
+services:
+  db-handler:
+    build: .
+    expose:
+      - 8000 # mostly for documentation
+    volumes:
+      - /Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv
+
+  app:
+    build: .
+    expose:
+      - 8000 # mostly for documentation
+
+  daemon:
+    build: .
+    expose:
+      - 8000 # mostly for documentation
+
+  data-analyzer:
+    build: .
+    expose:
+      - 8000 # mostly for documentation

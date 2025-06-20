@@ -4,14 +4,21 @@
 
 ## How
 
-### Endpoint - "/"
+### Endpoint - "/get"
 
-* **Request:**
-    * **GET**
-    * **Payload** - None
-* **Response**:
-    * **Code**: 200 is success, 500 if an error while parsing the database has occurred.
-    * **Payload**: Returns the whole database as json of the following format:
+**Request:**
+
+* **GET**
+* **Payload** - None
+
+**Response**:
+
+* **Code**:
+    * 200 - success
+    * 204 - an error occurred while reading the database namely it's empty.
+    * 404 - some columns in the payload are not in the database
+    * 500 - an error while parsing the database has occurred.
+* **Payload**: Returns the whole database as json of the following format:
 
 ```json
 {
@@ -45,9 +52,12 @@
 
 , where each list in "data" is a row.
 
-* **Request:**
-    * **POST**
-    * **Payload**: A JSON of the following form
+### Endpoint - "/commit"
+
+**Request:**
+
+* **POST**
+* **Payload**: A JSON of the following form
 
 ```json
 {
@@ -60,6 +70,11 @@
 }
 ```
 
-* **Response**:
-    * **Code**: 201 if success 500, if an error has occurred while adding data to the database.
-    * **Payload**: None
+**Response**:
+
+* **Code**:
+    * 201 - success.
+    * 204 - an error occurred while reading the database, namely it's empty.
+    * 404 - some columns in the payload are not in the database
+    * 500 - an error has occurred while adding data to the database or while parsing the database
+* **Payload**: None

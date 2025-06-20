@@ -1,47 +1,83 @@
-# API Endpoint related
+# Network related
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 # parsing related
-from datetime import datetime
-import pandas as pd
+from pandas import read_csv, DataFrame, concat
+
+# typing related
+from type_enforced import Enforcer
 
 app = FastAPI()
+PATH = "/db/db.csv"
 
 
-class EntryTemplate(BaseModel):
-    index: str
-    data: dict
+class GetPayload(BaseModel):
+    user: str
+    columns: list
 
 
-@app.get("/", status_code=200)
-async def get_db():
-    path = "db.csv"
+class PostPayload(BaseModel):
+    user: str
+    columns: dict
+
+
+@Enforcer
+def _access_db(path: str, payload: dict | None = None) -> DataFrame:
+    """
+    Access the database while checking it's and request's integrity and correctness
+    :param path: Path to the db
+    :param payload: the dict object
+    :return: pandas DataFrame of the database
+    :raises 500, 204, 404:
+    """
     try:
-        db = pd.read_csv(path, index_col="datetime")
+        db = read_csv(path, index_col="datetime")
     except Exception as err:
-        raise HTTPException(status_code=500, detail=f"An error occurred while importing the data base:\n"
-                                                    f"{type(err).__name__} - {err}")
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while importing the database:\n"
+                   f"{type(err).__name__} - {err}"
+        )
 
-    return db.to_json(orient="split")
+    if db.empty:
+        raise HTTPException(status_code=204, detail=f"The database at {path} is empty")
+
+    if not set(payload["columns"]).issubset(db.columns):
+        raise HTTPException(
+            status_code=404,
+            detail=f"Some columns in the payload are not in the database: {set(payload["columns"]).difference(db.columns)}"
+        )
+    return db
 
 
-@app.post("/", status_code=201)
-async def post_db(payload: EntryTemplate):
-    path = "db.csv"
-    try:
-        db = pd.read_csv(path)
-    except Exception as err:
-        raise HTTPException(status_code=500, detail=f"An internal exception has occurred:\n"
-                                                    f"{type(err).__name__} - {err}")
-    try:
-        # ensure correct formating
-        datetime.strptime(payload["index"], "%Y-%m-%d %H:%M:%S")
-        new_row = pd.DataFrame(payload["data"], index=payload["index"])
-    except Exception as err:
-        raise HTTPException(status_code=400, detail="Bad JSON:\n"
-                                                    f"{type(err).__name__} - {err}")
+@app.get("/get", status_code=200)
+async def get_db(payload: GetPayload) -> dict:
+    """
+    Converts user's data into a json string.
+    :param payload: The JSON payload with fields "user" and "columns"
+    :return: a json like string with the following keys: columns, index, data.
+    """
+    db = _access_db(PATH, dict(payload))
+    return db.loc[:, payload["columns"]].to_json(orient="split")
 
-    db = pd.concat([db, new_row])
-    db.to_csv(path)
+
+@app.post("/commit", status_code=201)
+def commit_db(payload: PostPayload) -> None:
+    """
+    Commit a change into the database
+    :param payload: JSON as per the docs.md
+    :return: 201
+    """
+    db = _access_db(PATH, dict(payload))
+
+    new_row = DataFrame(payload["data"], index=payload["index"])
+    db = concat([db, new_row])
+    db.to_csv(PATH)
+    return
+
+
+@app.get("/healthcheck", status_code=200)
+async def heath_check_db() -> None:
+    _access_db(PATH)
     return
