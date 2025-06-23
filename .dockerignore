@@ -1,7 +1,6 @@
 *
+!base-image
 !app
 !daemon
 !data-analyzer
 !db-handler
-!requirements.txt
-!test-requirements.txt

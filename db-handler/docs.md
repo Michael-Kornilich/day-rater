@@ -1,14 +1,9 @@
-## What
-
-* IO with the database
-
-## How
-
 ### Endpoint - "/get"
 
 **Request:**
 
 * **GET**
+* **Headers** - None
 * **Payload** - None
 
 **Response**:
@@ -57,7 +52,8 @@
 **Request:**
 
 * **POST**
-* **Payload**: A JSON of the following form
+* **Headers** - None
+* **Payload** - A JSON of the following form
 
 ```json
 {

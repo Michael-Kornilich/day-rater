@@ -1,6 +1,7 @@
 # Network related
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import List, Dict, Sequence
 
 # parsing related
 from pandas import read_csv, DataFrame, concat
@@ -12,20 +13,38 @@ app = FastAPI()
 PATH = "/db/db.csv"
 
 
+# Define the JSON models >>>
 class GetPayload(BaseModel):
     user: str
-    columns: list
+    columns: List[str] | None = None
 
 
-class PostPayload(BaseModel):
+class CommitPayload(BaseModel):
     user: str
-    columns: dict
+    data: Dict[str, str]
+
+
+# <<<
+
+@Enforcer
+def validate_incoming(payload: GetPayload | CommitPayload, columns: Sequence[str]) -> None:
+    """
+    Check that the columns in the payload are in the database
+    :param payload:
+    :param columns:
+    :return:
+    """
+    if not set(payload["columns"]).issubset(columns):
+        raise HTTPException(
+            status_code=404,
+            detail=f"Some columns in the payload are not in the database: {set(payload["columns"]).difference(db.columns)}"
+        )
 
 
 @Enforcer
-def _access_db(path: str, payload: dict | None = None) -> DataFrame:
+def load_db(path: str, payload: dict | None = None) -> DataFrame:
     """
-    Access the database while checking it's and request's integrity and correctness
+    Import the database while checking its integrity and correctness
     :param path: Path to the db
     :param payload: the dict object
     :return: pandas DataFrame of the database
@@ -54,22 +73,26 @@ def _access_db(path: str, payload: dict | None = None) -> DataFrame:
 @app.get("/get", status_code=200)
 async def get_db(payload: GetPayload) -> dict:
     """
-    Converts user's data into a json string.
+    Convert user's data into a json string.
     :param payload: The JSON payload with fields "user" and "columns"
     :return: a json like string with the following keys: columns, index, data.
     """
-    db = _access_db(PATH, dict(payload))
+    validate_incoming(payload)
+
+    db = load_db(PATH, dict(payload))
     return db.loc[:, payload["columns"]].to_json(orient="split")
 
 
 @app.post("/commit", status_code=201)
-def commit_db(payload: PostPayload) -> None:
+def commit_db(payload: CommitPayload) -> None:
     """
     Commit a change into the database
     :param payload: JSON as per the docs.md
     :return: 201
     """
-    db = _access_db(PATH, dict(payload))
+    validate_incoming(payload)
+
+    db = load_db(PATH, dict(payload))
 
     new_row = DataFrame(payload["data"], index=payload["index"])
     db = concat([db, new_row])
@@ -79,5 +102,9 @@ def commit_db(payload: PostPayload) -> None:
 
 @app.get("/healthcheck", status_code=200)
 async def heath_check_db() -> None:
-    _access_db(PATH)
+    """
+    Do a db healthcheck by importing it
+    :return: 200 if success,
+    """
+    load_db(PATH)
     return

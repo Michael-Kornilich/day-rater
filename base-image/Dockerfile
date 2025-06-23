@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-ARG PYTHON_VERSION=3.13.4
-FROM python:${PYTHON_VERSION}-alpine3.22
+ARG PYTHON_VERSION=3.13.3
+FROM python:${PYTHON_VERSION}-slim
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -9,11 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # the application crashes without emitting any logs due to buffering.
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
-
-# Intstall potentially missing dependencies for scientific libraries
-# RUN --mount=type=cache,target=/root/.cache/alpine \
-#     apk add --no-cache gcc
+WORKDIR app/
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -23,5 +19,4 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Copy the source code into the container.
 COPY . .
 
-# Run the application.
-CMD gunicorn '.venv.lib.python3.13.site-packages.fastapi.middleware.wsgi' --bind=0.0.0.0:8000
+# No CMD, since this is just a cache level
