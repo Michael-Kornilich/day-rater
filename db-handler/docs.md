@@ -4,7 +4,17 @@
 
 * **GET**
 * **Headers** - None
-* **Payload** - None
+* **Payload**
+```json
+{
+  "user": "<user-name>",
+  "columns": [
+    "col1",
+    "col2",
+    "..."
+  ]
+}
+```
 
 **Response**:
 

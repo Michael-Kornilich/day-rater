@@ -1,5 +1,5 @@
 *
-!base-image
+#!base-image
 !app
 !daemon
 !data-analyzer

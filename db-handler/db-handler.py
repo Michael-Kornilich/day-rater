@@ -1,7 +1,7 @@
 # Network related
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Sequence
+from typing import List, Dict
 
 # parsing related
 from pandas import read_csv, DataFrame, concat
@@ -13,7 +13,6 @@ app = FastAPI()
 PATH = "/db/db.csv"
 
 
-# Define the JSON models >>>
 class GetPayload(BaseModel):
     user: str
     columns: List[str] | None = None
@@ -24,10 +23,8 @@ class CommitPayload(BaseModel):
     data: Dict[str, str]
 
 
-# <<<
-
 @Enforcer
-def validate_incoming(payload: GetPayload | CommitPayload, columns: Sequence[str]) -> None:
+def validate_incoming(payload: GetPayload | CommitPayload, columns: List[str]) -> None:  # error in type enforcer
     """
     Check that the columns in the payload are in the database
     :param payload:

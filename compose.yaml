@@ -1,24 +1,27 @@
-# If you need more help, visit the Docker Compose reference guide at
-# https://docs.docker.com/go/compose-spec-reference/
+# IMPORTANT: BUILD THE BASE IMAGE (from base-image/) FIRST
+
+name: "Day Rater"
+
 services:
   db-handler:
-    build: .
-    expose:
-      - 8000 # mostly for documentation
+    build: db-handler/Docker/
+    container_name: "db-handler"
+    ports:
+      - "127.0.0.1:8000:8000"
     volumes:
       - /Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv
 
-  app:
-    build: .
-    expose:
-      - 8000 # mostly for documentation
-
-  daemon:
-    build: .
-    expose:
-      - 8000 # mostly for documentation
-
-  data-analyzer:
-    build: .
-    expose:
-      - 8000 # mostly for documentation
+#  app:
+#    build: .
+#    expose:
+#      - 8000 # mostly for documentation
+#
+#  daemon:
+#    build: .
+#    expose:
+#      - 8000 # mostly for documentation
+#
+#  data-analyzer:
+#    build: .
+#    expose:
+#      - 8000 # mostly for documentation
