@@ -39,7 +39,7 @@ def validate_incoming(payload: GetPayload | CommitPayload, columns: List[str]) -
 
 
 @Enforcer
-def load_db(path: str, payload: dict | None = None) -> DataFrame:
+def load_db(path: str) -> DataFrame:
     """
     Import the database while checking its integrity and correctness
     :param path: Path to the db
@@ -59,11 +59,6 @@ def load_db(path: str, payload: dict | None = None) -> DataFrame:
     if db.empty:
         raise HTTPException(status_code=204, detail=f"The database at {path} is empty")
 
-    if not set(payload["columns"]).issubset(db.columns):
-        raise HTTPException(
-            status_code=404,
-            detail=f"Some columns in the payload are not in the database: {set(payload["columns"]).difference(db.columns)}"
-        )
     return db
 
 

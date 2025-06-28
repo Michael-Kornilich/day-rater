@@ -1,6 +1,6 @@
 *
-#!base-image
-!app
-!daemon
-!data-analyzer
-!db-handler
+!.base-image/
+!app/
+!daemon/
+!data-analyzer/
+!db-handler/

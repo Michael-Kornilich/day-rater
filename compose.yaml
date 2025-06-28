@@ -1,27 +1,20 @@
-# IMPORTANT: BUILD THE BASE IMAGE (from base-image/) FIRST
+# IMPORTANT: BUILD THE BASE IMAGE (from .base-image/) FIRST
 
 name: "Day Rater"
 
 services:
   db-handler:
-    build: db-handler/Docker/
+    build:
+      context: "db-handler/"
+      dockerfile: "Docker/Dockerfile"
     container_name: "db-handler"
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
-      - /Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv
+      - /Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv # CHANGE when not running on this device
 
-#  app:
-#    build: .
-#    expose:
-#      - 8000 # mostly for documentation
-#
-#  daemon:
-#    build: .
-#    expose:
-#      - 8000 # mostly for documentation
-#
-#  data-analyzer:
-#    build: .
-#    expose:
-#      - 8000 # mostly for documentation
+    develop:
+      watch:
+        - path: "db-handler/db-handler.py"
+          target: "db-handler.py" # pwd = db-handler
+          action: sync+restart

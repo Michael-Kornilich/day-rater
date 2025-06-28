@@ -1,4 +1,4 @@
-FROM base-image:day-rater
+FROM dayrater-base-image
 
 WORKDIR db-handler/
 
@@ -6,6 +6,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
-COPY ../ .
+COPY db-handler.py .
 
 CMD ["fastapi", "run", "--port", "8000", "db-handler.py"]
