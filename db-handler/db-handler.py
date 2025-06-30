@@ -14,7 +14,7 @@ PATH = "/db/db.csv"
 
 
 class GetPayload(BaseModel):
-    user: strR
+    user: str
     columns: List[str] | None = None
 
 
