@@ -21,3 +21,7 @@ services:
         - path: "db-handler/db-handler.py"
           target: "/app/db-handler/db-handler.py"
           action: sync+restart
+
+        - path: "db-handler/utility.py"
+          target: "/app/db-handler/utility.py"
+          action: sync+restart

@@ -22,7 +22,7 @@
 
       container_name: "db-handler"
       ports:
-        # currently only visible to the host, change later to close
+        # currently only visible to the host, change later to 8000:8000 to keep the container in docker network
         - "127.0.0.1:8000:8000"
 
       # mostly for testing purposes, to hijack the path 
@@ -34,9 +34,13 @@
         - "/Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv"
 
       develop:
+        # relative paths to the scripts with project being the root
         watch:
-          # relative path to the script with project being the root
           - path: "db-handler/db-handler.py"
             target: "/app/db-handler/db-handler.py"
+            action: sync+restart
+
+          - path: "db-handler/utility.py"
+            target: "/app/db-handler/utility.py"
             action: sync+restart
 ```

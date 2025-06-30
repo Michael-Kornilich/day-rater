@@ -1,76 +1,26 @@
 # Network related
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI
 
 # parsing related
-from pandas import read_csv, DataFrame, concat
+from pandas import DataFrame, concat
 
 # typing related
-from pydantic import validate_call
-from typing import List, Dict, Optional, Sequence, Union
+from typing import Dict
 
 # for getting the db filepath
 from os import environ
 
+# utility functions
+from utility import (
+    GetPayload,
+    CommitPayload,
+    validate_get_columns,
+    validate_post_columns,
+    load_db
+)
+
 app = FastAPI()
 PATH = environ["INTERNAL_DB_PATH"]
-
-
-class GetPayload(BaseModel):
-    user: str
-    columns: Optional[List[str]] = None
-
-
-class CommitPayload(BaseModel):
-    user: str
-    datetime: str
-    data: Dict[str, Union[int, float, str]]
-
-
-@validate_call
-def validate_columns(payload: GetPayload | CommitPayload, columns: Sequence[str]) -> None:  # error in type enforcer
-    """
-    Incoming JSON validator. Checks columns
-    Why: incorporating this into the Get | CommitPayload would bring over-proportional complexity
-
-    :param payload: The incoming JSON object
-    :param columns: Columns in the database
-    :return: None
-    :raises 400: if the payload is bad
-    """
-    if payload.columns is None:
-        return
-
-    if not set(payload.columns).issubset(columns):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Some columns in the payload are not in the database: {",".join(set(payload.columns).difference(columns))}"
-        )
-
-
-@validate_call
-def load_db(path: str) -> DataFrame:
-    """
-    Import the database while checking its integrity and correctness
-
-    :param path: Path to the db
-    :return: pandas DataFrame of the database
-    :raises 500: if the pandas import failed
-    :raises 204: if the database file is empty
-    """
-    try:
-        db = read_csv(path, index_col="datetime")
-    except Exception as err:
-        raise HTTPException(
-            status_code=500,
-            detail="An error occurred while importing the database:\n"
-                   f"{type(err).__name__} - {err}"
-        )
-
-    if db.empty:
-        raise HTTPException(status_code=204, detail=f"The database at {path} is empty")
-
-    return db
 
 
 @app.get("/get", status_code=200)
@@ -81,7 +31,7 @@ async def get_db(payload: GetPayload) -> Dict[str, list]:
     :return: a json like string with the following keys: columns, index, data.
     """
     db = load_db(PATH)
-    validate_columns(payload, list(db.columns))
+    validate_get_columns(payload, tuple(db.columns))
 
     # in the payload the columns are optional
     columns = payload.columns or db.columns
@@ -99,9 +49,9 @@ def commit_db(payload: CommitPayload) -> None:
     :raises 400, 500, 204: Same as load_db and validate_columns
     """
     db = load_db(PATH)
-    validate_columns(payload, db.columns)
+    validate_post_columns(payload, tuple(db.columns))
 
-    new_row = DataFrame(payload.data, index=payload.index)
+    new_row = DataFrame(payload.data, index=[payload.datetime])
     db = concat([db, new_row])
     db.to_csv(PATH)
     return

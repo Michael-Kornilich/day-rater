@@ -1,5 +1,7 @@
 ### Endpoint - "/get"
 
+---
+
 **Request:**
 
 * **GET**
@@ -58,7 +60,11 @@ Not passing "columns" will the return all the columns for the user
 
 , where each list in "data" is a row.
 
+---
+
 ### Endpoint - "/commit"
+
+
 
 **Request:**
 
@@ -68,7 +74,8 @@ Not passing "columns" will the return all the columns for the user
 
 ```json
 {
-  "index": "YYYY-MM-DD HH:MM:SS",
+  "user": "<username>",
+  "datetime": "YYYY-MM-DD HH:MM:SS",
   "data": {
     "col1": "<data-point>",
     "col2": "<data-point>",
