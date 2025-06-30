@@ -4,7 +4,7 @@
 
 * **GET**
 * **Headers** - None
-* **Payload**
+* **Payload** -
 ```json
 {
   "user": "<user-name>",
@@ -15,6 +15,7 @@
   ]
 }
 ```
+Not passing "columns" will the return all the columns for the user
 
 **Response**:
 

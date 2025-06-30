@@ -1,38 +1,46 @@
 # Network related
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict
 
 # parsing related
 from pandas import read_csv, DataFrame, concat
 
 # typing related
-from type_enforced import Enforcer
+from pydantic import validate_call
+from typing import List, Dict, Optional, Sequence, Union
+
+# for getting the db filepath
+from os import environ
 
 app = FastAPI()
-PATH = "/db/db.csv"
+PATH = environ["INTERNAL_DB_PATH"]
 
 
 class GetPayload(BaseModel):
     user: str
-    columns: List[str] | None = None
+    columns: Optional[List[str]] = None
 
 
 class CommitPayload(BaseModel):
     user: str
-    data: Dict[str, str]
+    datetime: str
+    data: Dict[str, Union[int, float, str]]
 
 
-@Enforcer
-def validate_columns(payload: GetPayload | CommitPayload, columns: List[str]) -> None:  # error in type enforcer
+@validate_call
+def validate_columns(payload: GetPayload | CommitPayload, columns: Sequence[str]) -> None:  # error in type enforcer
     """
-    Check that the columns in the payload are in the database
-    :param payload:
-    :param columns:
-    :return:
+    Incoming JSON validator. Checks columns
+    Why: incorporating this into the Get | CommitPayload would bring over-proportional complexity
+
+    :param payload: The incoming JSON object
+    :param columns: Columns in the database
+    :return: None
+    :raises 400: if the payload is bad
     """
-    # datetime is not a column, but an index
-    # should change the structure, where the index is sent separately
+    if payload.columns is None:
+        return
+
     if not set(payload.columns).issubset(columns):
         raise HTTPException(
             status_code=400,
@@ -40,13 +48,15 @@ def validate_columns(payload: GetPayload | CommitPayload, columns: List[str]) ->
         )
 
 
-@Enforcer
+@validate_call
 def load_db(path: str) -> DataFrame:
     """
     Import the database while checking its integrity and correctness
+
     :param path: Path to the db
     :return: pandas DataFrame of the database
-    :raises 500, 204, 404:
+    :raises 500: if the pandas import failed
+    :raises 204: if the database file is empty
     """
     try:
         db = read_csv(path, index_col="datetime")
@@ -64,7 +74,7 @@ def load_db(path: str) -> DataFrame:
 
 
 @app.get("/get", status_code=200)
-async def get_db(payload: GetPayload) -> dict:
+async def get_db(payload: GetPayload) -> Dict[str, list]:
     """
     Convert user's data into a json string.
     :param payload: The JSON payload with fields "user" and "columns"
@@ -73,15 +83,20 @@ async def get_db(payload: GetPayload) -> dict:
     db = load_db(PATH)
     validate_columns(payload, list(db.columns))
 
-    return db.loc[:, payload.columns].to_json(orient="split")
+    # in the payload the columns are optional
+    columns = payload.columns or db.columns
+
+    return db.loc[:, columns].to_dict(orient="split")  # error: invalid dict
 
 
+# Not async to avoid race conditions
 @app.post("/commit", status_code=201)
 def commit_db(payload: CommitPayload) -> None:
     """
     Commit a change into the database
     :param payload: JSON as per the docs.md
-    :return: 201
+    :return: 201 if success
+    :raises 400, 500, 204: Same as load_db and validate_columns
     """
     db = load_db(PATH)
     validate_columns(payload, db.columns)
@@ -97,6 +112,7 @@ async def heath_check_db() -> None:
     """
     Do a db healthcheck by importing it
     :return: 200 if success
+    :raises 500, 204: same as load_db
     """
     load_db(PATH)
     return

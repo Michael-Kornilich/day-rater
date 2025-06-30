@@ -11,6 +11,8 @@ services:
     container_name: "db-handler"
     ports:
       - "127.0.0.1:8000:8000"
+    environment:
+      INTERNAL_DB_PATH: "/db/db.csv"
     volumes:
       - "/Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv"
 

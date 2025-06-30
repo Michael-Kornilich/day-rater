@@ -2,4 +2,3 @@ fastapi[standard]==0.115.12
 pydantic==2.11.5
 pytest==8.3.5
 requests==2.32.3
-type_enforced==2.1.0
