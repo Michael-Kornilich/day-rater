@@ -1,5 +1,6 @@
 FROM dayrater-base-image
 
+# /app/db-handler/...
 WORKDIR db-handler/
 
 RUN --mount=type=cache,target=/root/.cache/pip \

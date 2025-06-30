@@ -14,7 +14,7 @@ PATH = "/db/db.csv"
 
 
 class GetPayload(BaseModel):
-    user: str
+    user: strR
     columns: List[str] | None = None
 
 
@@ -24,17 +24,19 @@ class CommitPayload(BaseModel):
 
 
 @Enforcer
-def validate_incoming(payload: GetPayload | CommitPayload, columns: List[str]) -> None:  # error in type enforcer
+def validate_columns(payload: GetPayload | CommitPayload, columns: List[str]) -> None:  # error in type enforcer
     """
     Check that the columns in the payload are in the database
     :param payload:
     :param columns:
     :return:
     """
-    if not set(payload["columns"]).issubset(columns):
+    # datetime is not a column, but an index
+    # should change the structure, where the index is sent separately
+    if not set(payload.columns).issubset(columns):
         raise HTTPException(
-            status_code=404,
-            detail=f"Some columns in the payload are not in the database: {set(payload["columns"]).difference(db.columns)}"
+            status_code=400,
+            detail=f"Some columns in the payload are not in the database: {",".join(set(payload.columns).difference(columns))}"
         )
 
 
@@ -43,7 +45,6 @@ def load_db(path: str) -> DataFrame:
     """
     Import the database while checking its integrity and correctness
     :param path: Path to the db
-    :param payload: the dict object
     :return: pandas DataFrame of the database
     :raises 500, 204, 404:
     """
@@ -69,10 +70,10 @@ async def get_db(payload: GetPayload) -> dict:
     :param payload: The JSON payload with fields "user" and "columns"
     :return: a json like string with the following keys: columns, index, data.
     """
-    validate_incoming(payload)
+    db = load_db(PATH)
+    validate_columns(payload, list(db.columns))
 
-    db = load_db(PATH, dict(payload))
-    return db.loc[:, payload["columns"]].to_json(orient="split")
+    return db.loc[:, payload.columns].to_json(orient="split")
 
 
 @app.post("/commit", status_code=201)
@@ -82,11 +83,10 @@ def commit_db(payload: CommitPayload) -> None:
     :param payload: JSON as per the docs.md
     :return: 201
     """
-    validate_incoming(payload)
+    db = load_db(PATH)
+    validate_columns(payload, db.columns)
 
-    db = load_db(PATH, dict(payload))
-
-    new_row = DataFrame(payload["data"], index=payload["index"])
+    new_row = DataFrame(payload.data, index=payload.index)
     db = concat([db, new_row])
     db.to_csv(PATH)
     return
@@ -96,7 +96,7 @@ def commit_db(payload: CommitPayload) -> None:
 async def heath_check_db() -> None:
     """
     Do a db healthcheck by importing it
-    :return: 200 if success,
+    :return: 200 if success
     """
     load_db(PATH)
     return

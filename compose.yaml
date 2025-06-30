@@ -3,6 +3,7 @@
 name: "Day Rater"
 
 services:
+  # details in the build-and-run.md in db-handler/
   db-handler:
     build:
       context: "db-handler/"
@@ -11,10 +12,10 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
-      - /Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv # CHANGE when not running on this device
+      - "/Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv"
 
     develop:
       watch:
         - path: "db-handler/db-handler.py"
-          target: "db-handler.py" # pwd = db-handler
+          target: "/app/db-handler/db-handler.py"
           action: sync+restart
