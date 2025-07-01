@@ -154,7 +154,7 @@ if day_rank:
         "sleet_intensity": weather_data.get("sleetIntensityAvg"),
         "snow_intensity": weather_data.get("snowIntensityAvg")
     }
-    # call db-handler with the entry json
+    # call db_handler with the entry json
 
 if analyze:
     # call analyzer

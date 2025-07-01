@@ -3,12 +3,12 @@
 name: "Day Rater"
 
 services:
-  # details in the build-and-run.md in db-handler/
+  # details in the build-and-run.md in db_handler/
   db-handler:
     build:
-      context: "db-handler/"
+      context: "db_handler/"
       dockerfile: "Docker/Dockerfile"
-    container_name: "db-handler"
+    container_name: "db_handler"
     ports:
       - "127.0.0.1:8000:8000"
     environment:
@@ -18,13 +18,17 @@ services:
 
     develop:
       watch:
-        - path: "db-handler/db-handler.py"
-          target: "/app/db-handler/db-handler.py"
+        - path: "db_handler/db_handler.py"
+          target: "/app/db_handler/db_handler.py"
           action: sync+restart
 
-        - path: "db-handler/utility.py"
-          target: "/app/db-handler/utility.py"
+        - path: "db_handler/utility.py"
+          target: "/app/db_handler/utility.py"
           action: sync+restart
 
         - path: "Docker/Dockerfile"
           action: rebuild
+
+        - path: "db_handler/tests/test_handler.py"
+          target: "/app/db_handler/tests/test_handler.py"
+          action: sync+restart

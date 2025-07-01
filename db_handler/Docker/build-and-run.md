@@ -9,12 +9,12 @@
     db-handler:
       build:
         # microservice's directory
-        context: "db-handler/"
+        context: "db_handler/"
 
         # path to the dockerfile of the db handler
         dockerfile: "Docker/Dockerfile"
 
-      container_name: "db-handler"
+      container_name: "db_handler"
       ports:
         # currently only visible to the host, change later to 8000:8000 to keep the container in docker network
         - "127.0.0.1:8000:8000"
@@ -30,11 +30,11 @@
       develop:
         # relative paths to the scripts with project being the root
         watch:
-          - path: "db-handler/db-handler.py"
-            target: "/app/db-handler/db-handler.py"
+          - path: "db_handler/db_handler.py"
+            target: "/app/db_handler/db_handler.py"
             action: sync+restart
 
-          - path: "db-handler/utility.py"
-            target: "/app/db-handler/utility.py"
+          - path: "db_handler/utility.py"
+            target: "/app/db_handler/utility.py"
             action: sync+restart
 ```
