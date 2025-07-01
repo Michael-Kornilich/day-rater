@@ -1,7 +1,7 @@
 # Network related
 from fastapi import FastAPI
 
-# parsing related
+# parsing & IO related
 from pandas import DataFrame, concat
 
 # typing related
@@ -10,7 +10,7 @@ from typing import Dict
 # for getting the db filepath
 from os import environ
 
-# utility functions
+# utility functions / objects
 from utility import (
     GetPayload,
     CommitPayload,
@@ -53,16 +53,16 @@ def commit_db(payload: CommitPayload) -> None:
 
     new_row = DataFrame(payload.data, index=[payload.datetime])
     db = concat([db, new_row])
-    db.to_csv(PATH)
+    db.to_csv(PATH, index=True, index_label="datetime")
     return
 
 
 @app.get("/healthcheck", status_code=200)
-async def heath_check_db() -> None:
+async def heath_check_db() -> dict:
     """
     Do a db healthcheck by importing it
     :return: 200 if success
     :raises 500, 204: same as load_db
     """
-    load_db(PATH)
-    return
+    db = load_db(PATH)
+    return {"columns": len(db.columns), "rows": len(db)}

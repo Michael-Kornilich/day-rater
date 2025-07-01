@@ -1,10 +1,4 @@
-### IMPORTANT: the base image with the name `base-image` must be built before building these instructions
-
-**Build alone with**\
-`docker build -t db-handler <path-to-this-directory>`
-
-**Run alone with**\
-`docker run --name db-handler -p 127.0.0.1:8000:8000 -v <path-to-db-on-host>:/db/db.csv db-handler:day-rater`
+### IMPORTANT: the base image from `.base-image` must be built before building these instructions
 
 **Build & run in the compose.yaml with**
 

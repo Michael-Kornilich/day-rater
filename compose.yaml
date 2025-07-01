@@ -25,3 +25,6 @@ services:
         - path: "db-handler/utility.py"
           target: "/app/db-handler/utility.py"
           action: sync+restart
+
+        - path: "Docker/Dockerfile"
+          action: rebuild
