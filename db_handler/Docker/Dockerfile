@@ -2,7 +2,7 @@
 FROM dayrater-base-image
 
 # /app/db_handler/...
-WORKDIR db-handler/
+WORKDIR db_handler/
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
@@ -10,4 +10,4 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY --exclude="docx.md" --exclude="Docker/" --exclude="requirements.txt" . .
 
-CMD ["fastapi", "run", "--port", "8000", "db-handler.py"]
+CMD ["fastapi", "run", "--port", "8000", "db_handler.py"]

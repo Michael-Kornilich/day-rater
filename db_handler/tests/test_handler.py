@@ -2,30 +2,34 @@
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
 
-# module imported
-from importlib import import_module
+# tested objects
+from db_handler.db_handler import app
+from db_handler.utility import (
+    load_db,
+    validate_get_columns,
+    validate_post_columns,
+    GetPayload,
+    CommitPayload
+)
 
 # testing related
 import pytest
 
-app = import_module("db_handler").app
-client = TestClient(app)
-
-GetPayload = import_module("db_handler").GetPayload
-CommitPayload = import_module("db_handler").CommitPayload
-load_db = import_module("utility.py").load_db
-validate_post_columns = import_module("utility.py").validate_post_columns
-validate_get_columns = import_module("utility.py").validate_get_columns
+microservice = TestClient(app)
 
 """
 No server needed to test, only pytest
 The container however has to be running to run the tests
 
 To test run
-docker container exec --tty <container-id> python -m pytest
+docker container exec --tty db_handler python -m pytest
 """
 
 
 # TODO: write the tests
-def test_loader():
-    payload = GetPayload(user=15, columns=["hello", "world"])
+def test_loader_empty_db():
+    def check_status_code(err: HTTPException) -> bool:
+        return True if err.status_code == 204 else False
+
+    with pytest.raises(HTTPException, check_status_code):
+        load_db(path="test_mock_empty_db.csv")

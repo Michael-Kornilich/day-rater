@@ -11,7 +11,7 @@ from typing import Dict
 from os import environ
 
 # utility functions / objects
-from utility import (
+from db_handler.utility import (
     GetPayload,
     CommitPayload,
     validate_get_columns,

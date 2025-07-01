@@ -13,6 +13,7 @@ services:
       - "127.0.0.1:8000:8000"
     environment:
       INTERNAL_DB_PATH: "/db/db.csv"
+      CONTAINER_NAME: "db_handler"
     volumes:
       - "/Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv"
 

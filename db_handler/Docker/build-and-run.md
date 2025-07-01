@@ -23,6 +23,7 @@
       # when changing copy the path into volumes after :
       environment:
         INTERNAL_DB_PATH: "/db/db.csv"
+        CONTAINER_NAME: "db_handler"
       volumes:
         # Database bind. CHANGE when not running on this device
         - "/Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv"
