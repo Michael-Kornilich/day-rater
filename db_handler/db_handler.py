@@ -1,7 +1,10 @@
-# Network related
+# Server related
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi import Request
 
-# parsing & IO related
+# parsing & IO
 from pandas import DataFrame, concat
 
 # typing related
@@ -21,6 +24,15 @@ from db_handler.utility import (
 
 app = FastAPI()
 PATH = environ["INTERNAL_DB_PATH"]
+
+
+# Override the default handler for pydantic's ValidationError
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    err_dict = exc.errors()[0]
+    where = err_dict["loc"]
+    detail = {"msg": err_dict["msg"], "got": err_dict["input"]}
+    return JSONResponse(content={"loc": where, "detail": detail}, status_code=400)
 
 
 @app.get("/get", status_code=200)

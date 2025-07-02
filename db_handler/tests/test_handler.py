@@ -28,8 +28,14 @@ docker container exec --tty db_handler python -m pytest
 
 # TODO: write the tests
 def test_loader_empty_db():
-    def check_status_code(err: HTTPException) -> bool:
-        return True if err.status_code == 204 else False
+    def check_error(err: HTTPException) -> bool:
+        if err.status_code != 204:
+            return False
 
-    with pytest.raises(HTTPException, check_status_code):
+        if "An error occurred while importing the database" not in err.detail:
+            return False
+
+        return True
+
+    with pytest.raises(HTTPException, check=check_error):
         load_db(path="test_mock_empty_db.csv")
