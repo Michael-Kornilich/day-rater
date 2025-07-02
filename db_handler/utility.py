@@ -9,7 +9,6 @@ from pandas import read_csv, DataFrame
 from pydantic import validate_call
 from typing import List, Dict, Optional, Tuple, Union
 
-# TODO: add custom error handling
 class GetPayload(BaseModel):
     user: str
     columns: Optional[List[str]] = None
