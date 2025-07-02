@@ -25,8 +25,8 @@ To test run
 docker container exec --tty db_handler python -m pytest
 """
 
-
-# TODO: write the tests
+# TODO: more extensive testing of the loader
+# + skewed db, not .csv files
 class TestLoader:
     def test_on_empty_db(self):
         def check_error(err: HTTPException) -> bool:
@@ -56,3 +56,8 @@ class TestLoader:
 
         with pytest.raises(HTTPException, check=check_error):
             load_db(path=bad_path)
+
+# TODO: test the data validator
+# number of columns, SQL injections?, data type validation
+
+# TODO: test the column validator

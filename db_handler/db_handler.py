@@ -19,6 +19,7 @@ from db_handler.utility import (
     CommitPayload,
     validate_get_columns,
     validate_post_columns,
+    validate_post_data,
     load_db
 )
 
@@ -26,7 +27,7 @@ app = FastAPI()
 PATH = environ["INTERNAL_DB_PATH"]
 
 
-# Override the default handler for pydantic's ValidationError
+# Override the default handler for pydantic ValidationError's
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     err_dict = exc.errors()[0]
@@ -62,6 +63,7 @@ def commit_db(payload: CommitPayload) -> None:
     """
     db = load_db(PATH)
     validate_post_columns(payload, tuple(db.columns))
+    validate_post_data(payload, db)
 
     new_row = DataFrame(payload.data, index=[payload.datetime])
     db = concat([db, new_row])
