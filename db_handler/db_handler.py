@@ -49,7 +49,7 @@ async def get_db(payload: GetPayload) -> Dict[str, list]:
     # in the payload the columns are optional
     columns = payload.columns or db.columns
 
-    return db.loc[:, columns].to_dict(orient="split")  # error: invalid dict
+    return db.loc[:, columns].to_dict(orient="split")
 
 
 # Not async to avoid race conditions

@@ -29,7 +29,7 @@
         - "/Users/Misha/Documents/python_projects/day-rater-db/db.csv:/db/db.csv"
 
       develop:
-        # relative paths to the scripts with project being the root
+        # for faster development 
         watch:
           - path: "db_handler/db_handler.py"
             target: "/app/db_handler/db_handler.py"
@@ -37,5 +37,12 @@
 
           - path: "db_handler/utility.py"
             target: "/app/db_handler/utility.py"
+            action: sync+restart
+
+          - path: "Docker/Dockerfile"
+            action: rebuild
+
+          - path: "db_handler/tests/test_handler.py"
+            target: "/app/db_handler/tests/test_handler.py"
             action: sync+restart
 ```

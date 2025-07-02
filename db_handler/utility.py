@@ -67,7 +67,7 @@ def validate_post_columns(payload: CommitPayload, columns: Tuple[str, ...]) -> N
 
 
 @enforce_types
-def validate_post_data(payload: CommitPayload, db: DataFrame) -> None:
+def validate_post_data(payload: CommitPayload) -> None:
     # checking index
     from datetime import datetime
     try:
