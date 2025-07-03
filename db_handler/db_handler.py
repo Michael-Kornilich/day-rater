@@ -28,7 +28,7 @@ PATH = environ["INTERNAL_DB_PATH"]
 
 # Override the default handler for pydantic ValidationError's
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     err_dict = exc.errors()[0]
     where = err_dict["loc"]
     detail = {"msg": err_dict["msg"], "got": err_dict["input"]}
@@ -36,7 +36,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 @app.get("/get", status_code=200)
-async def get_db(payload: GetPayload) -> Dict[str, list]:
+async def get_db(payload: GetPayload) -> dict:
     """
     Convert user's data into a json string.
     :param payload: The JSON payload with fields "user" and "columns"
