@@ -17,8 +17,7 @@ from os import environ
 from db_handler.utility import (
     GetPayload,
     CommitPayload,
-    validate_get_columns,
-    validate_post_columns,
+    validate_columns,
     validate_post_data,
     load_db
 )
@@ -44,9 +43,9 @@ async def get_db(payload: GetPayload) -> Dict[str, list]:
     :return: a json like string with the following keys: columns, index, data.
     """
     db = load_db(PATH)
-    validate_get_columns(payload, tuple(db.columns))
+    validate_columns(payload, tuple(db.columns))
 
-    # in the payload the columns are optional
+    # in the GetPayload the columns are optional
     columns = payload.columns or db.columns
 
     return db.loc[:, columns].to_dict(orient="split")
@@ -62,7 +61,7 @@ def commit_db(payload: CommitPayload) -> None:
     :raises 400, 500, 204: Same as load_db and validate_columns
     """
     db = load_db(PATH)
-    validate_post_columns(payload, tuple(db.columns))
+    validate_columns(payload, tuple(db.columns))
     validate_post_data(payload, db)
 
     new_row = DataFrame(payload.data, index=[payload.datetime])

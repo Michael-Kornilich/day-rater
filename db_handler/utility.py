@@ -22,47 +22,37 @@ class CommitPayload(BaseModel):
 
 
 @enforce_types
-def validate_get_columns(payload: GetPayload, db_columns: Tuple[str, ...]) -> None:
+def validate_columns(payload: Union[GetPayload | CommitPayload], columns: Tuple[str, ...]) -> None:
     """
     Incoming JSON validator. Cross validates incoming columns with the ones in the database
     Why: incorporating this into the GetPayload would bring over-proportional complexity
-
-    :param payload: The incoming JSON object
-    :param db_columns: Columns in the database
-    :return: None
-    :raises 400: if the payload is bad
-    """
-    if payload.columns is None:
-        return
-
-    if len(payload.columns) != set(payload.columns):
-        raise HTTPException(
-            status_code=400,
-            detail=f"There are duplicates in the requested columns: {",".join(payload.columns)}"
-        )
-
-    if not set(payload.columns).issubset(db_columns):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Some columns in the payload are not in the database: {",".join(set(payload.columns).difference(db_columns))}"
-        )
-
-
-@enforce_types
-def validate_post_columns(payload: CommitPayload, columns: Tuple[str, ...]) -> None:
-    """
-    Incoming JSON validator. Cross validates incoming columns with the ones in the database
-    Why: incorporating this into the CommitPayload would bring over-proportional complexity
 
     :param payload: The incoming JSON object
     :param columns: Columns in the database
     :return: None
     :raises 400: if the payload is bad
     """
-    if not set(payload.data.keys()).issubset(columns):
+    got_columns = list(payload.columns if isinstance(payload, GetPayload) else payload.data.keys())
+
+    if isinstance(payload, GetPayload) and got_columns is None:
+        return
+
+    if isinstance(payload, CommitPayload) and not got_columns:
         raise HTTPException(
             status_code=400,
-            detail=f"Some columns in the payload are not in the database: {",".join(set(payload.columns).difference(columns))}"
+            detail=f"Columns (data) are empty"
+        )
+
+    if len(got_columns) != set(got_columns):
+        raise HTTPException(
+            status_code=400,
+            detail=f"There are duplicates in the requested columns: {",".join(filter(lambda x: got_columns.count(x) > 1, got_columns))}"
+        )
+
+    if not set(got_columns).issubset(columns):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Some columns in the payload are not in the database: {",".join(set(got_columns).difference(columns))}"
         )
 
 
