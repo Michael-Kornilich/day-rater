@@ -42,7 +42,11 @@
           - path: "Docker/Dockerfile"
             action: rebuild
 
-          - path: "db_handler/tests/test_handler.py"
-            target: "/app/db_handler/tests/test_handler.py"
+          - path: "db_handler/tests/test_utility.py"
+            target: "/app/db_handler/tests/test_utility.py"
+            action: sync+restart
+
+          - path: "db_handler/tests/test_api.py"
+            target: "/app/db_handler/tests/test_api.py"
             action: sync+restart
 ```

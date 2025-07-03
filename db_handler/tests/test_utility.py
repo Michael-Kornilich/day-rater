@@ -1,13 +1,13 @@
 # bridge to the fastapi
-from fastapi.testclient import TestClient
 from fastapi import HTTPException
+
+# typing
 from typing import Callable
 
 # type enforcer
 from pydantic import validate_call as enforce_types
 
 # tested objects
-from db_handler.db_handler import app
 from db_handler.utility import (
     load_db,
     validate_columns,
@@ -18,9 +18,7 @@ from db_handler.utility import (
 
 # testing related
 import pytest
-from random import sample, randint
-
-microservice = TestClient(app)
+from random import sample
 
 """
 No server needed to test, only pytest
