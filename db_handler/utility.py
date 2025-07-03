@@ -1,5 +1,6 @@
 # Network related
 from fastapi import HTTPException
+from numpy.version import git_revision
 from pydantic import BaseModel
 
 # parsing related
@@ -32,9 +33,16 @@ def validate_columns(payload: Union[GetPayload | CommitPayload], columns: Tuple[
     :return: None
     :raises 400: if the payload is bad
     """
-    got_columns = list(payload.columns if isinstance(payload, GetPayload) else payload.data.keys())
+    if not columns:
+        raise ValueError("Passed database columns are empty")
 
-    if isinstance(payload, GetPayload) and got_columns is None:
+    got_columns: list = payload.columns if isinstance(payload, GetPayload) else payload.data.keys()
+    if got_columns:
+        got_columns = list(got_columns)
+    else:
+        got_columns = []
+
+    if isinstance(payload, GetPayload) and not got_columns:
         return
 
     if isinstance(payload, CommitPayload) and not got_columns:
@@ -43,7 +51,7 @@ def validate_columns(payload: Union[GetPayload | CommitPayload], columns: Tuple[
             detail=f"Columns (data) are empty"
         )
 
-    if len(got_columns) != set(got_columns):
+    if len(got_columns) != len(set(got_columns)):
         raise HTTPException(
             status_code=400,
             detail=f"There are duplicates in the requested columns: {",".join(filter(lambda x: got_columns.count(x) > 1, got_columns))}"
@@ -65,7 +73,7 @@ def validate_post_data(payload: CommitPayload) -> None:
     except Exception as err:
         raise HTTPException(
             status_code=400,
-            detail=f"{type(err).__name__} - {err}"
+            detail=f"Bad index: {type(err).__name__} - {err}"
         )
 
     if not payload.data:
