@@ -27,7 +27,7 @@ def parse_response(response) -> str:
 
 
 def test_bad_path():
-    response = client.request("GET", "/bad_path")
+    response = client.request("POST", "/bad_path")
     if response.status_code < 400:
         pytest.fail(f"Bad path accepted although should have not. {parse_response(response)}")
 
@@ -42,7 +42,7 @@ class TestGetDB:
     # why .request and not .get => .get does not support (json) body in the request
     def test_good_request(self):
         response = client.request(
-            "GET",
+            "POST",
             "/get",
             json={"user": "me"}
         )
@@ -50,7 +50,7 @@ class TestGetDB:
 
     def test_wrong_keys(self):
         response = client.request(
-            "GET",
+            "POST",
             "/get",
             json={"user": "me", "hello": "hello world"}
         )
@@ -58,7 +58,7 @@ class TestGetDB:
 
     def test_empty_columns(self):
         response = client.request(
-            "GET",
+            "POST",
             "/get",
             json={"user": "me", "columns": []}
         )
@@ -66,7 +66,7 @@ class TestGetDB:
 
     def test_bad_column_values(self):
         response = client.request(
-            "GET",
+            "POST",
             "/get",
             json={"user": "me", "columns": ["xy", "zh"]}
         )
@@ -79,7 +79,7 @@ class TestCommitDB:
         environ["DEBUG"] = "True"
 
     def test_wrong_keys(self):
-        response = client.request("GET", "/commit", json={
+        response = client.request("POST", "/commit", json={
             "user": "me",
             "datetime": "2020-05-01 20:30:45",
             "odd_key": ["hello", "world"],

@@ -1,7 +1,7 @@
 # Network related
 from fastapi import HTTPException
 from numpy.version import git_revision
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # parsing related
 from pandas import read_csv, DataFrame
@@ -15,11 +15,15 @@ class GetPayload(BaseModel):
     user: str
     columns: List[str] = None
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class CommitPayload(BaseModel):
     user: str
     datetime: str
     data: Dict[str, Union[int, float, str]]
+
+    model_config = ConfigDict(extra='forbid')
 
 
 @enforce_types

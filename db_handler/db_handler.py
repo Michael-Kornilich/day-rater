@@ -7,9 +7,6 @@ from fastapi import Request
 # parsing & IO
 from pandas import DataFrame, concat
 
-# typing related
-from typing import Dict
-
 # for getting the db filepath
 from os import environ
 
@@ -34,8 +31,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     detail = {"msg": err_dict["msg"], "got": err_dict["input"]}
     return JSONResponse(content={"loc": where, "detail": detail}, status_code=400)
 
-
-@app.get("/get", status_code=200)
+# why: GET requests don't usually accept bodies as a convention
+@app.post("/get", status_code=200)
 async def get_db(payload: GetPayload) -> dict:
     """
     Convert user's data into a json string.
@@ -62,7 +59,7 @@ def commit_db(payload: CommitPayload) -> None:
     """
     db = load_db(PATH)
     validate_columns(payload, tuple(db.columns))
-    validate_post_data(payload, db)
+    validate_post_data(payload)
 
     new_row = DataFrame(payload.data, index=[payload.datetime])
     db = concat([db, new_row])
