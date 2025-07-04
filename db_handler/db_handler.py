@@ -66,6 +66,10 @@ def commit_db(payload: CommitPayload) -> None:
 
     new_row = DataFrame(payload.data, index=[payload.datetime])
     db = concat([db, new_row])
+
+    # for purposes of testing the commit endpoints prevent writing into the db
+    if bool(environ["DEBUG"]): return
+
     db.to_csv(PATH, index=True, index_label="datetime")
     return
 

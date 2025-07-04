@@ -13,7 +13,7 @@ from typing import List, Dict, Optional, Tuple, Union
 
 class GetPayload(BaseModel):
     user: str
-    columns: Optional[List[str]] = None
+    columns: List[str] = None
 
 
 class CommitPayload(BaseModel):
