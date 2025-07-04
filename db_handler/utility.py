@@ -1,6 +1,5 @@
 # Network related
 from fastapi import HTTPException
-from numpy.version import git_revision
 from pydantic import BaseModel, ConfigDict
 
 # parsing related
@@ -8,7 +7,7 @@ from pandas import read_csv, DataFrame
 
 # typing related
 from pydantic import validate_call as enforce_types
-from typing import List, Dict, Optional, Tuple, Union
+from typing import List, Dict, Tuple, Union
 
 
 class GetPayload(BaseModel):

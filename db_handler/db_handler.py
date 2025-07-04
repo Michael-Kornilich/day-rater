@@ -31,6 +31,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     detail = {"msg": err_dict["msg"], "got": err_dict["input"]}
     return JSONResponse(content={"loc": where, "detail": detail}, status_code=400)
 
+
 # why: GET requests don't usually accept bodies as a convention
 @app.post("/get", status_code=200)
 async def get_db(payload: GetPayload) -> dict:
@@ -65,7 +66,7 @@ def commit_db(payload: CommitPayload) -> None:
     db = concat([db, new_row])
 
     # for purposes of testing the commit endpoints prevent writing into the db
-    if bool(environ["DEBUG"]): return
+    if eval(environ["DEBUG"]): return
 
     db.to_csv(PATH, index=True, index_label="datetime")
     return

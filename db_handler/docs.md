@@ -4,7 +4,7 @@
 
 **Request:**
 
-* **GET**
+* **POST**
 * **Headers** - None
 * **Payload** -
 ```json
