@@ -1,8 +1,12 @@
-* Take in the requests from the facade with the day rating and the text from the user
-* calls the APIs
-* Packages the whole info and sends it to the db_handler
+Data flow inbound:
 
-Also
+* POST "Commit to the DB" request to record the information
+* GET "Analyze" request from the facade to launch the data analysis script (async obviously)
+* Receives the results from the analyser
+* Calls the APIs as a background task
 
-* Takes in the "analyze" request from the facade
-* calls the data analyser, waits for the data (in async) and returns it to the facade
+Data flow outbound:
+
+* Calls the data analyser script
+* Packages and calls the commit request to the db through the handler
+* Routes data from data-analyser to the facade

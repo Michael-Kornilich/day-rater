@@ -1,16 +1,20 @@
-from datetime import datetime, date
-
-# API related
-import requests
+# Networking related
+from fastapi import FastAPI
 import json
+import httpx
+
+# typing related
+from pydantic import validate_call as enforce_types
+
+# miscellaneous
+from datetime import datetime, date
 from time import sleep
 
 # process related
-import subprocess
 import warnings
-import argparse
 
 
+@enforce_types
 def get_season(dt: date | datetime) -> str:
     """
     Get a season of the year from a datetime object.
@@ -35,6 +39,7 @@ def get_season(dt: date | datetime) -> str:
         raise ValueError(f"Invalid month {month}")
 
 
+@enforce_types
 def load_json(path: str) -> dict:
     """
     Unlike json.load(), this function only requires a path to parse a json into a dictionary

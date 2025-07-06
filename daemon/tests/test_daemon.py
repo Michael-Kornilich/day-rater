@@ -1,4 +1,4 @@
-from daemon import *
+from daemon.daemon import *
 
 
 class TestDBWriter:

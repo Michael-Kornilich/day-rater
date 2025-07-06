@@ -1,6 +1,6 @@
 *
 !.base-image/
-!app/
+!facade/
 !daemon/
 !data-analyzer/
 !db_handler/
