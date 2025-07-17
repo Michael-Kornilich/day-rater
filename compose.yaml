@@ -37,3 +37,29 @@ services:
         - path: "db_handler/tests/test_api.py"
           target: "/app/db_handler/tests/test_api.py"
           action: sync+restart
+
+  # details in the build-and-run.md in data_analyzer/
+  data-analyzer:
+    build:
+      context: "data_analyzer/"
+      dockerfile: "Docker/Dockerfile"
+
+    container_name: "data-analyser"
+    ports:
+      - "127.0.0.1:8001:8000"
+
+    environment:
+      CONTAINER_NAME: "data_analyzer"
+
+    develop:
+      watch:
+        - path: "data_analyzer/data_analyzer.py"
+          target: "/app/data_analyzer/data_analyzer.py"
+          action: sync+restart
+
+        - path: "data_analyzer/routing.py"
+          target: "/app/data_analyzer/routing.py"
+          action: sync+restart
+
+        - path: "Docker/Dockerfile"
+          action: rebuild
