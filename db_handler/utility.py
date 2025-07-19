@@ -37,7 +37,7 @@ def validate_columns(payload: Union[GetPayload | CommitPayload], columns: Tuple[
     :raises 400: if the payload is bad
     """
     if not columns:
-        raise ValueError("Passed database columns are empty")
+        raise ValueError("Passed database columns are empty") # FIXME: inconsistent error handling
 
     got_columns: list = payload.columns if isinstance(payload, GetPayload) else payload.data.keys()
     if got_columns:
