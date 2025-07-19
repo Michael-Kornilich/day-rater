@@ -4,12 +4,12 @@
 
 ## MVP
 
-1. `python run.py --rank <rating>` - updates the db with the rating and background pulling of other data
-2. `python run.py --analyze` - analyzes the data in the db and create statistics and visualizations of the
-   dependencies
+* WhatsApp bot where the user shares how their day was
+* Statistical analysis of the correcations of the day rating and outside factors (weather)
 
 ## Features down the line
 
+* Support of multiple messaging apps
 * Comparison between people's ratings
 * Ability to generate posts for social media
 * ChatGPT for text parsing
@@ -19,9 +19,4 @@
 ## Technical
 * Pull weather data like overcast, pressure, and wind. Compare them to the rating
 * Host a lightweight database
-
-* Tasks of the daemon
-  * calling the APIs
-  * writing to the db
-  * calling the analyzer script
-
+* Run the project on Vercel
