@@ -1,4 +1,4 @@
-# Day rater
+# Day rater - UNFINISHED
 
 **Goal:** gain insights into what influences welfare
 
